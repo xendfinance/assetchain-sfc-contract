@@ -1,6 +1,14 @@
+pragma experimental ABIEncoderV2;
 pragma solidity ^0.5.0;
 
 interface SFCI {
+
+    struct WithdrawalRequest {
+        uint256 epoch;
+        uint256 time;
+        uint256 amount;
+    }
+
     function currentSealedEpoch() external view returns (uint256);
 
     function getEpochSnapshot(uint256) external view returns (uint256 endTime, uint256 epochFee, uint256 totalBaseRewardWeight, uint256 totalTxRewardWeight, uint256 _baseRewardPerSecond, uint256 totalStake, uint256 totalSupply);
@@ -79,7 +87,7 @@ interface SFCI {
 
     function delegate(uint256 toValidatorID) external payable;
 
-    function undelegate(uint256 toValidatorID, uint256 wrID, uint256 amount) external;
+    function undelegate(uint256 toValidatorID, uint256 amount) external;
 
     function isSlashed(uint256 validatorID) external view returns (bool);
 
@@ -105,7 +113,7 @@ interface SFCI {
 
     function updateTreasuryAddress(address v) external;
 
-    function burnFTM(uint256 amount) external;
+    function burnVITRA(uint256 amount) external;
 
     function sealEpoch(uint256[] calldata offlineTime, uint256[] calldata offlineBlocks, uint256[] calldata uptimes, uint256[] calldata originatedTxsFee, uint256 epochGas) external;
 
@@ -131,7 +139,15 @@ interface SFCI {
 
     function voteBookAddress() external view returns (address);
 
-    function liquidateSFTM(address delegator, uint256 toValidatorID, uint256 amount) external;
+    function liquidateSVITRA(address delegator, uint256 toValidatorID, uint256 amount) external;
 
-    function updateSFTMFinalizer(address v) external;
+    function updateSVITRAFinalizer(address v) external;
+
+    function getWrRequests(
+        address delegator,
+        uint256 validatorID,
+        uint256 offset,
+        uint256 limit
+    ) external view returns (WithdrawalRequest[] memory);
+
 }

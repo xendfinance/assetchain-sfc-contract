@@ -52,6 +52,8 @@ contract SFCState is Initializable, Ownable {
 
     mapping(address => mapping(uint256 => mapping(uint256 => WithdrawalRequest))) public getWithdrawalRequest;
 
+    mapping(address => mapping(uint256 => uint256)) internal wrIdCount;
+
     struct LockedDelegation {
         uint256 lockedStake;
         uint256 fromEpoch;
@@ -107,5 +109,5 @@ contract SFCState is Initializable, Ownable {
 
     address public voteBookAddress;
 
-    address internal sftmFinalizer;
+    address internal svitraFinalizer;
 }

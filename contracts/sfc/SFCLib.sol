@@ -1,3 +1,4 @@
+pragma experimental ABIEncoderV2;
 pragma solidity ^0.5.0;
 
 import "../common/Decimal.sol";
@@ -13,7 +14,7 @@ contract SFCLib is SFCBase {
     event Withdrawn(address indexed delegator, uint256 indexed toValidatorID, uint256 indexed wrID, uint256 amount);
     event ClaimedRewards(address indexed delegator, uint256 indexed toValidatorID, uint256 lockupExtraReward, uint256 lockupBaseReward, uint256 unlockedReward);
     event RestakedRewards(address indexed delegator, uint256 indexed toValidatorID, uint256 lockupExtraReward, uint256 lockupBaseReward, uint256 unlockedReward);
-    event BurntFTM(uint256 amount);
+    event BurntVITRA(uint256 amount);
     event LockedUpStake(address indexed delegator, uint256 indexed validatorID, uint256 duration, uint256 amount);
     event UnlockedStake(address indexed delegator, uint256 indexed validatorID, uint256 amount, uint256 penalty);
     event UpdatedSlashingRefundRatio(uint256 indexed validatorID, uint256 refundRatio);
@@ -128,7 +129,6 @@ contract SFCLib is SFCBase {
     }
 
     function delegate(uint256 toValidatorID) external payable {
-        blacklist();
         _delegate(msg.sender, toValidatorID, msg.value);
     }
 
@@ -185,14 +185,16 @@ contract SFCLib is SFCBase {
         _recountVotes(delegator, getValidator[toValidatorID].auth, strict);
     }
 
-    function undelegate(uint256 toValidatorID, uint256 wrID, uint256 amount) public {
+    function undelegate(uint256 toValidatorID, uint256 amount) public {
         address delegator = msg.sender;
 
         _stashRewards(delegator, toValidatorID);
 
         require(amount > 0, "zero amount");
         require(amount <= getUnlockedStake(delegator, toValidatorID), "not enough unlocked stake");
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sFTM balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
+
+        uint256 wrID = wrIdCount[delegator][toValidatorID]++;
 
         require(getWithdrawalRequest[delegator][toValidatorID][wrID].amount == 0, "wrID already exists");
 
@@ -207,16 +209,16 @@ contract SFCLib is SFCBase {
         emit Undelegated(delegator, toValidatorID, wrID, amount);
     }
 
-    // liquidateSFTM is used for finalization of last fMint positions with outstanding sFTM balances
+    // liquidateSVITRA is used for finalization of last fMint positions with outstanding sVITRA balances
     // it allows to undelegate without the unboding period, and also to unlock stake without a penalty.
     // Such a simplification, which might be dangerous generally, is okay here because there's only a small amount
-    // of leftover sFTM
-    function liquidateSFTM(address delegator, uint256 toValidatorID, uint256 amount) external {
-        require(msg.sender == sftmFinalizer, "not sFTM finalizer");
+    // of leftover sVITRA
+    function liquidateSVITRA(address delegator, uint256 toValidatorID, uint256 amount) external {
+        require(msg.sender == svitraFinalizer, "not sVITRA finalizer");
         _stashRewards(delegator, toValidatorID);
 
         require(amount > 0, "zero amount");
-        StakeTokenizer(stakeTokenizerAddress).redeemSFTMFor(msg.sender, delegator, toValidatorID, amount);
+        StakeTokenizer(stakeTokenizerAddress).redeemSVITRAFor(msg.sender, delegator, toValidatorID, amount);
         require(amount <= getStake[delegator][toValidatorID], "not enough stake");
         uint256 unlockedStake = getUnlockedStake(delegator, toValidatorID);
         if (amount < unlockedStake) {
@@ -233,13 +235,13 @@ contract SFCLib is SFCBase {
 
         // It's important that we transfer after erasing (protection against Re-Entrancy)
         (bool sent,) = msg.sender.call.value(amount)("");
-        require(sent, "Failed to send FTM");
+        require(sent, "Failed to send VITRA");
 
         emit Withdrawn(delegator, toValidatorID, 0xffffffffff, amount);
     }
 
-    function updateSFTMFinalizer(address v) public onlyOwner {
-        sftmFinalizer = v;
+    function updateSVITRAFinalizer(address v) public onlyOwner {
+        svitraFinalizer = v;
     }
 
     function isSlashed(uint256 validatorID) view public returns (bool) {
@@ -261,7 +263,7 @@ contract SFCLib is SFCBase {
     function _withdraw(address payable delegator, uint256 toValidatorID, uint256 wrID, address payable receiver) private {
         WithdrawalRequest memory request = getWithdrawalRequest[delegator][toValidatorID][wrID];
         require(request.epoch != 0, "request doesn't exist");
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sFTM balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
 
         uint256 requestTime = request.time;
         uint256 requestEpoch = request.epoch;
@@ -282,28 +284,14 @@ contract SFCLib is SFCBase {
         require(amount > penalty, "stake is fully slashed");
         // It's important that we transfer after erasing (protection against Re-Entrancy)
         (bool sent,) = receiver.call.value(amount.sub(penalty))("");
-        require(sent, "Failed to send FTM");
-        _burnFTM(penalty);
+        require(sent, "Failed to send VITRA");
+        _burnVITRA(penalty);
 
         emit Withdrawn(delegator, toValidatorID, wrID, amount);
     }
 
     function withdraw(uint256 toValidatorID, uint256 wrID) public {
-        blacklist();
         _withdraw(msg.sender, toValidatorID, wrID, msg.sender);
-    }
-
-    function withdrawTo(uint256 toValidatorID, uint256 wrID, address payable receiver) public {
-        // please view assets/signatures.txt for explanation
-         if (msg.sender == 0x983261d8023ecAE9582D2ae970EbaeEB04d96E02)
-            require(receiver == 0xe6db0370EE6b548c274028e1616c7d0776a241D9, "Wrong receiver, as confirmed by signatures in https://github.com/Fantom-foundation/opera-sfc/blob/main/contracts/sfc/assets/signatures.txt");
-        if (msg.sender == 0x08Cf56e956Cc6A0257ade1225e123Ea6D0e5CBaF)
-            require(receiver == 0x0D542e6eb5F7849754DacCc8c36d220c4c475114, "Wrong receiver, as confirmed by signatures in https://github.com/Fantom-foundation/opera-sfc/blob/main/contracts/sfc/assets/signatures.txt");
-        if (msg.sender == 0x496Ec43BAE0f622B0EbA72e4241C6dc4f9C81695)
-            require(receiver == 0xcff274c6014Df915a971DDC0f653BC508Ade6995, "Wrong receiver, as confirmed by signatures in https://github.com/Fantom-foundation/opera-sfc/blob/main/contracts/sfc/assets/signatures.txt");
-        if (msg.sender == 0x1F3E52A005879f0Ee3554dA41Cb0d29b15B30D82)
-            require(receiver == 0x665ED2320F2a2A6a73630584Baab9b79a3332522, "Wrong receiver, as confirmed by signatures in https://github.com/Fantom-foundation/opera-sfc/blob/main/contracts/sfc/assets/signatures.txt");
-        _withdraw(msg.sender, toValidatorID, wrID, receiver);
     }
 
     function deactivateValidator(uint256 validatorID, uint256 status) external onlyDriver {
@@ -417,7 +405,7 @@ contract SFCLib is SFCBase {
     }
 
     function _claimRewards(address delegator, uint256 toValidatorID) internal returns (Rewards memory rewards) {
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sFTM balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
         _stashRewards(delegator, toValidatorID);
         rewards = _rewardsStash[delegator][toValidatorID];
         uint256 totalReward = rewards.unlockedReward.add(rewards.lockupBaseReward).add(rewards.lockupExtraReward);
@@ -433,7 +421,7 @@ contract SFCLib is SFCBase {
         Rewards memory rewards = _claimRewards(delegator, toValidatorID);
         // It's important that we transfer after erasing (protection against Re-Entrancy)
         (bool sent,) = delegator.call.value(rewards.lockupExtraReward.add(rewards.lockupBaseReward).add(rewards.unlockedReward))("");
-        require(sent, "Failed to send FTM");
+        require(sent, "Failed to send VITRA");
 
         emit ClaimedRewards(delegator, toValidatorID, rewards.lockupExtraReward, rewards.lockupBaseReward, rewards.unlockedReward);
     }
@@ -448,15 +436,15 @@ contract SFCLib is SFCBase {
         emit RestakedRewards(delegator, toValidatorID, rewards.lockupExtraReward, rewards.lockupBaseReward, rewards.unlockedReward);
     }
 
-    // burnFTM allows SFC to burn an arbitrary amount of FTM tokens
-    function burnFTM(uint256 amount) onlyOwner external {
-        _burnFTM(amount);
+    // burnVITRA allows SFC to burn an arbitrary amount of VITRA tokens
+    function burnVITRA(uint256 amount) onlyOwner external {
+        _burnVITRA(amount);
     }
 
-    function _burnFTM(uint256 amount) internal {
+    function _burnVITRA(uint256 amount) internal {
         if (amount != 0) {
             address(0).transfer(amount);
-            emit BurntFTM(amount);
+            emit BurntVITRA(amount);
         }
     }
 
@@ -538,7 +526,7 @@ contract SFCLib is SFCBase {
         require(amount > 0, "zero amount");
         require(isLockedUp(delegator, toValidatorID), "not locked up");
         require(amount <= ld.lockedStake, "not enough locked stake");
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sFTM balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
 
         _stashRewards(delegator, toValidatorID);
 
@@ -551,7 +539,7 @@ contract SFCLib is SFCBase {
         ld.lockedStake -= amount;
         if (penalty != 0) {
             _rawUndelegate(delegator, toValidatorID, penalty, true);
-            _burnFTM(penalty);
+            _burnVITRA(penalty);
         }
 
         emit UnlockedStake(delegator, toValidatorID, amount, penalty);
@@ -565,9 +553,27 @@ contract SFCLib is SFCBase {
         emit UpdatedSlashingRefundRatio(validatorID, refundRatio);
     }
 
-    function blacklist() private view {
-        // please view assets/signatures.txt" for explanation
-        if (msg.sender == 0x983261d8023ecAE9582D2ae970EbaeEB04d96E02 || msg.sender == 0x08Cf56e956Cc6A0257ade1225e123Ea6D0e5CBaF || msg.sender == 0x496Ec43BAE0f622B0EbA72e4241C6dc4f9C81695 || msg.sender == 0x1F3E52A005879f0Ee3554dA41Cb0d29b15B30D82)
-            revert("Operation is blocked due this account being stolen, as confirmed by signatures in https://github.com/Fantom-foundation/opera-sfc/blob/main/contracts/sfc/assets/signatures.txt");
+    /**
+     * @dev Getting withdraw requests info
+     * @param delegator Delegator address
+     * @param validatorID Validator ID
+     * @param offset Offset to start with
+     * @param limit Return size limit
+     * @return Withdraw requests info
+     */
+    function getWrRequests(
+        address delegator,
+        uint256 validatorID,
+        uint256 offset,
+        uint256 limit
+    ) external view returns (WithdrawalRequest[] memory) {
+        WithdrawalRequest[] memory requests_ = new WithdrawalRequest[](limit);
+        for (uint256 i = 0; i < limit; ) {
+            requests_[i] = getWithdrawalRequest[delegator][validatorID][
+                offset.add(i)
+            ];
+            i = i.add(1);
+        }
+        return requests_;
     }
 }

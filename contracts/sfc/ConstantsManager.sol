@@ -7,7 +7,7 @@ import "../common/Decimal.sol";
 contract ConstantsManager is Ownable {
     using SafeMath for uint256;
 
-    // Minimum amount of stake for a validator, i.e., 500000 FTM
+    // Minimum amount of stake for a validator, i.e., 500000 VITRA
     uint256 public minSelfStake;
     // Maximum ratio of delegations a validator can have, say, 15 times of self-stake
     uint256 public maxDelegatedRatio;
@@ -99,7 +99,6 @@ contract ConstantsManager is Ownable {
     }
 
     function updateWithdrawalPeriodTime(uint256 v) onlyOwner external {
-        require(v >= 86400, "too small value");
         require(v <= 30 * 86400, "too large value");
         withdrawalPeriodTime = v;
     }

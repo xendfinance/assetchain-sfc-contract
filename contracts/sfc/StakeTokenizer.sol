@@ -12,49 +12,49 @@ contract Spacer {
 contract StakeTokenizer is Spacer, Initializable {
     SFC internal sfc;
 
-    mapping(address => mapping(uint256 => uint256)) public outstandingSFTM;
+    mapping(address => mapping(uint256 => uint256)) public outstandingSVITRA;
 
-    address public sFTMTokenAddress;
+    address public sVITRATokenAddress;
 
-    function initialize(address payable _sfc, address _sFTMTokenAddress) public initializer {
+    function initialize(address payable _sfc, address _sVITRATokenAddress) public initializer {
         sfc = SFC(_sfc);
-        sFTMTokenAddress = _sFTMTokenAddress;
+        sVITRATokenAddress = _sVITRATokenAddress;
     }
 
-    function mintSFTM(uint256 toValidatorID) external {
-        revert("sFTM minting is disabled");
+    function mintSVITRA(uint256 toValidatorID) external {
+        revert("sVITRA minting is disabled");
 //        address delegator = msg.sender;
 //        uint256 lockedStake = sfc.getLockedStake(delegator, toValidatorID);
 //        require(lockedStake > 0, "delegation isn't locked up");
-//        require(lockedStake > outstandingSFTM[delegator][toValidatorID], "sFTM is already minted");
+//        require(lockedStake > outstandingSVITRA[delegator][toValidatorID], "sVITRA is already minted");
 //
-//        uint256 diff = lockedStake - outstandingSFTM[delegator][toValidatorID];
-//        outstandingSFTM[delegator][toValidatorID] = lockedStake;
+//        uint256 diff = lockedStake - outstandingSVITRA[delegator][toValidatorID];
+//        outstandingSVITRA[delegator][toValidatorID] = lockedStake;
 //
-//        // It's important that we mint after updating outstandingSFTM (protection against Re-Entrancy)
-//        require(ERC20Mintable(sFTMTokenAddress).mint(delegator, diff), "failed to mint sFTM");
+//        // It's important that we mint after updating outstandingSVITRA (protection against Re-Entrancy)
+//        require(ERC20Mintable(sVITRATokenAddress).mint(delegator, diff), "failed to mint sVITRA");
     }
 
-    function redeemSFTM(uint256 validatorID, uint256 amount) external {
-        require(outstandingSFTM[msg.sender][validatorID] >= amount, "low outstanding sFTM balance");
-        require(IERC20(sFTMTokenAddress).allowance(msg.sender, address(this)) >= amount, "insufficient allowance");
-        outstandingSFTM[msg.sender][validatorID] -= amount;
+    function redeemSVITRA(uint256 validatorID, uint256 amount) external {
+        require(outstandingSVITRA[msg.sender][validatorID] >= amount, "low outstanding sVITRA balance");
+        require(IERC20(sVITRATokenAddress).allowance(msg.sender, address(this)) >= amount, "insufficient allowance");
+        outstandingSVITRA[msg.sender][validatorID] -= amount;
 
-        // It's important that we burn after updating outstandingSFTM (protection against Re-Entrancy)
-        ERC20Burnable(sFTMTokenAddress).burnFrom(msg.sender, amount);
+        // It's important that we burn after updating outstandingSVITRA (protection against Re-Entrancy)
+        ERC20Burnable(sVITRATokenAddress).burnFrom(msg.sender, amount);
     }
 
-    function redeemSFTMFor(address payer, address delegator, uint256 validatorID, uint256 amount) external {
+    function redeemSVITRAFor(address payer, address delegator, uint256 validatorID, uint256 amount) external {
         require(msg.sender == address(sfc), "not SFC");
-        require(outstandingSFTM[delegator][validatorID] >= amount, "low outstanding sFTM balance");
-        require(IERC20(sFTMTokenAddress).allowance(payer, address(this)) >= amount, "insufficient allowance");
-        outstandingSFTM[delegator][validatorID] -= amount;
+        require(outstandingSVITRA[delegator][validatorID] >= amount, "low outstanding sVITRA balance");
+        require(IERC20(sVITRATokenAddress).allowance(payer, address(this)) >= amount, "insufficient allowance");
+        outstandingSVITRA[delegator][validatorID] -= amount;
 
-        // It's important that we burn after updating outstandingSFTM (protection against Re-Entrancy)
-        ERC20Burnable(sFTMTokenAddress).burnFrom(payer, amount);
+        // It's important that we burn after updating outstandingSVITRA (protection against Re-Entrancy)
+        ERC20Burnable(sVITRATokenAddress).burnFrom(payer, amount);
     }
 
     function allowedToWithdrawStake(address sender, uint256 validatorID) public view returns(bool) {
-        return outstandingSFTM[sender][validatorID] == 0;
+        return outstandingSVITRA[sender][validatorID] == 0;
     }
 }
