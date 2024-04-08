@@ -13,16 +13,20 @@ contract NetworkInitializer {
 
         ConstantsManager consts = new ConstantsManager();
         consts.initialize();
-        consts.updateMinSelfStake(500000 * 1e18);
+        consts.updateMinSelfStake(100000 * 1e18);
         consts.updateMaxDelegatedRatio(16 * Decimal.unit());
         consts.updateValidatorCommission((15 * Decimal.unit()) / 100);
+
         consts.updateBurntFeeShare((20 * Decimal.unit()) / 100);
         consts.updateTreasuryFeeShare((10 * Decimal.unit()) / 100);
         consts.updateUnlockedRewardRatio((30 * Decimal.unit()) / 100);
+
         consts.updateMinLockupDuration(86400 * 14);
         consts.updateMaxLockupDuration(86400 * 365);
         consts.updateWithdrawalPeriodEpochs(3);
         consts.updateWithdrawalPeriodTime(60 * 60 * 24 * 7);
+        // base reward per second = 0.93 RWA
+        // (930000000000000000 / 1e18) = 0.93 RWA per second
         consts.updateBaseRewardPerSecond(930000000000000000);
         consts.updateOfflinePenaltyThresholdTime(5 days);
         consts.updateOfflinePenaltyThresholdBlocksNum(1000);

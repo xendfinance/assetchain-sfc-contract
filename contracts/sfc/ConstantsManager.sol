@@ -7,7 +7,7 @@ import "../common/Decimal.sol";
 contract ConstantsManager is Ownable {
     using SafeMath for uint256;
 
-    // Minimum amount of stake for a validator, i.e., 500000 VITRA
+    // Minimum amount of stake for a validator, i.e., 500000 RWA
     uint256 public minSelfStake;
     // Maximum ratio of delegations a validator can have, say, 15 times of self-stake
     uint256 public maxDelegatedRatio;

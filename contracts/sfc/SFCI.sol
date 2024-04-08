@@ -113,7 +113,7 @@ interface SFCI {
 
     function updateTreasuryAddress(address v) external;
 
-    function burnVITRA(uint256 amount) external;
+    function burnRWA(uint256 amount) external;
 
     function sealEpoch(uint256[] calldata offlineTime, uint256[] calldata offlineBlocks, uint256[] calldata uptimes, uint256[] calldata originatedTxsFee, uint256 epochGas) external;
 
@@ -139,9 +139,9 @@ interface SFCI {
 
     function voteBookAddress() external view returns (address);
 
-    function liquidateSVITRA(address delegator, uint256 toValidatorID, uint256 amount) external;
+    function liquidateSRWA(address delegator, uint256 toValidatorID, uint256 amount) external;
 
-    function updateSVITRAFinalizer(address v) external;
+    function updateSRWAFinalizer(address v) external;
 
     function getWrRequests(
         address delegator,

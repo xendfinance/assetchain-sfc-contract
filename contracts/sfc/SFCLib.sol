@@ -14,7 +14,7 @@ contract SFCLib is SFCBase {
     event Withdrawn(address indexed delegator, uint256 indexed toValidatorID, uint256 indexed wrID, uint256 amount);
     event ClaimedRewards(address indexed delegator, uint256 indexed toValidatorID, uint256 lockupExtraReward, uint256 lockupBaseReward, uint256 unlockedReward);
     event RestakedRewards(address indexed delegator, uint256 indexed toValidatorID, uint256 lockupExtraReward, uint256 lockupBaseReward, uint256 unlockedReward);
-    event BurntVITRA(uint256 amount);
+    event BurntRWA(uint256 amount);
     event LockedUpStake(address indexed delegator, uint256 indexed validatorID, uint256 duration, uint256 amount);
     event UnlockedStake(address indexed delegator, uint256 indexed validatorID, uint256 amount, uint256 penalty);
     event UpdatedSlashingRefundRatio(uint256 indexed validatorID, uint256 refundRatio);
@@ -192,7 +192,7 @@ contract SFCLib is SFCBase {
 
         require(amount > 0, "zero amount");
         require(amount <= getUnlockedStake(delegator, toValidatorID), "not enough unlocked stake");
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sRWA balance");
 
         uint256 wrID = wrIdCount[delegator][toValidatorID]++;
 
@@ -209,16 +209,16 @@ contract SFCLib is SFCBase {
         emit Undelegated(delegator, toValidatorID, wrID, amount);
     }
 
-    // liquidateSVITRA is used for finalization of last fMint positions with outstanding sVITRA balances
+    // liquidateSRWA is used for finalization of last fMint positions with outstanding sRWA balances
     // it allows to undelegate without the unboding period, and also to unlock stake without a penalty.
     // Such a simplification, which might be dangerous generally, is okay here because there's only a small amount
-    // of leftover sVITRA
-    function liquidateSVITRA(address delegator, uint256 toValidatorID, uint256 amount) external {
-        require(msg.sender == svitraFinalizer, "not sVITRA finalizer");
+    // of leftover sRWA
+    function liquidateSRWA(address delegator, uint256 toValidatorID, uint256 amount) external {
+        require(msg.sender == srwaFinalizer, "not sRWA finalizer");
         _stashRewards(delegator, toValidatorID);
 
         require(amount > 0, "zero amount");
-        StakeTokenizer(stakeTokenizerAddress).redeemSVITRAFor(msg.sender, delegator, toValidatorID, amount);
+        StakeTokenizer(stakeTokenizerAddress).redeemSRWAFor(msg.sender, delegator, toValidatorID, amount);
         require(amount <= getStake[delegator][toValidatorID], "not enough stake");
         uint256 unlockedStake = getUnlockedStake(delegator, toValidatorID);
         if (amount < unlockedStake) {
@@ -235,13 +235,13 @@ contract SFCLib is SFCBase {
 
         // It's important that we transfer after erasing (protection against Re-Entrancy)
         (bool sent,) = msg.sender.call.value(amount)("");
-        require(sent, "Failed to send VITRA");
+        require(sent, "Failed to send RWA");
 
         emit Withdrawn(delegator, toValidatorID, 0xffffffffff, amount);
     }
 
-    function updateSVITRAFinalizer(address v) public onlyOwner {
-        svitraFinalizer = v;
+    function updateSRWAFinalizer(address v) public onlyOwner {
+        srwaFinalizer = v;
     }
 
     function isSlashed(uint256 validatorID) view public returns (bool) {
@@ -263,7 +263,7 @@ contract SFCLib is SFCBase {
     function _withdraw(address payable delegator, uint256 toValidatorID, uint256 wrID, address payable receiver) private {
         WithdrawalRequest memory request = getWithdrawalRequest[delegator][toValidatorID][wrID];
         require(request.epoch != 0, "request doesn't exist");
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sRWA balance");
 
         uint256 requestTime = request.time;
         uint256 requestEpoch = request.epoch;
@@ -284,8 +284,8 @@ contract SFCLib is SFCBase {
         require(amount > penalty, "stake is fully slashed");
         // It's important that we transfer after erasing (protection against Re-Entrancy)
         (bool sent,) = receiver.call.value(amount.sub(penalty))("");
-        require(sent, "Failed to send VITRA");
-        _burnVITRA(penalty);
+        require(sent, "Failed to send RWA");
+        _burnRWA(penalty);
 
         emit Withdrawn(delegator, toValidatorID, wrID, amount);
     }
@@ -405,7 +405,7 @@ contract SFCLib is SFCBase {
     }
 
     function _claimRewards(address delegator, uint256 toValidatorID) internal returns (Rewards memory rewards) {
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sRWA balance");
         _stashRewards(delegator, toValidatorID);
         rewards = _rewardsStash[delegator][toValidatorID];
         uint256 totalReward = rewards.unlockedReward.add(rewards.lockupBaseReward).add(rewards.lockupExtraReward);
@@ -421,7 +421,7 @@ contract SFCLib is SFCBase {
         Rewards memory rewards = _claimRewards(delegator, toValidatorID);
         // It's important that we transfer after erasing (protection against Re-Entrancy)
         (bool sent,) = delegator.call.value(rewards.lockupExtraReward.add(rewards.lockupBaseReward).add(rewards.unlockedReward))("");
-        require(sent, "Failed to send VITRA");
+        require(sent, "Failed to send RWA");
 
         emit ClaimedRewards(delegator, toValidatorID, rewards.lockupExtraReward, rewards.lockupBaseReward, rewards.unlockedReward);
     }
@@ -436,15 +436,15 @@ contract SFCLib is SFCBase {
         emit RestakedRewards(delegator, toValidatorID, rewards.lockupExtraReward, rewards.lockupBaseReward, rewards.unlockedReward);
     }
 
-    // burnVITRA allows SFC to burn an arbitrary amount of VITRA tokens
-    function burnVITRA(uint256 amount) onlyOwner external {
-        _burnVITRA(amount);
+    // burnRWA allows SFC to burn an arbitrary amount of RWA tokens
+    function burnRWA(uint256 amount) onlyOwner external {
+        _burnRWA(amount);
     }
 
-    function _burnVITRA(uint256 amount) internal {
+    function _burnRWA(uint256 amount) internal {
         if (amount != 0) {
             address(0).transfer(amount);
-            emit BurntVITRA(amount);
+            emit BurntRWA(amount);
         }
     }
 
@@ -526,7 +526,7 @@ contract SFCLib is SFCBase {
         require(amount > 0, "zero amount");
         require(isLockedUp(delegator, toValidatorID), "not locked up");
         require(amount <= ld.lockedStake, "not enough locked stake");
-        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sVITRA balance");
+        require(_checkAllowedToWithdraw(delegator, toValidatorID), "outstanding sRWA balance");
 
         _stashRewards(delegator, toValidatorID);
 
@@ -539,7 +539,7 @@ contract SFCLib is SFCBase {
         ld.lockedStake -= amount;
         if (penalty != 0) {
             _rawUndelegate(delegator, toValidatorID, penalty, true);
-            _burnVITRA(penalty);
+            _burnRWA(penalty);
         }
 
         emit UnlockedStake(delegator, toValidatorID, amount, penalty);

@@ -210,7 +210,7 @@ interface SFCUnitTestI {
 
     function updateTreasuryAddress(address v) external;
 
-    function burnVITRA(uint256 amount) external;
+    function burnRWA(uint256 amount) external;
 
     function sealEpoch(uint256[] calldata offlineTime, uint256[] calldata offlineBlocks, uint256[] calldata uptimes, uint256[] calldata originatedTxsFee, uint256 epochGas) external;
 

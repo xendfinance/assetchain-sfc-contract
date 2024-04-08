@@ -109,5 +109,5 @@ contract SFCState is Initializable, Ownable {
 
     address public voteBookAddress;
 
-    address internal svitraFinalizer;
+    address internal srwaFinalizer;
 }
