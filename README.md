@@ -188,3 +188,131 @@ false
 
   125 passing (2m)
 ```
+
+
+
+Starting migrations...
+======================
+> Network name:    'dev'
+> Network id:      42422
+> Block gas limit: 281474976710655 (0xffffffffffff)
+
+
+1_initial_migration.js
+======================
+
+   Replacing 'Migrations'
+   ----------------------
+   > transaction hash:    0x6684d25d12bcaeeb0738132e272f01b4859ce0f07ee24c514067b0fc9761536d
+   > Blocks: 3            Seconds: 8
+   > contract address:    0x01E08d905A3Bd61AAe87D415724127317ae90B50
+   > block number:        5
+   > block timestamp:     1712680624
+   > account:             0x354E68DA6285dF1Fd80D60f4a3e4f54d7A6c1bac
+   > balance:             35999999.9617798
+   > gas used:            191101 (0x2ea7d)
+   > gas price:           200 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0382202 ETH
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           0.0382202 ETH
+
+
+2_deploy_staker_info.js
+=======================
+
+   Deploying 'Stakers'
+   -------------------
+   > transaction hash:    0xa32baa653da27ad2a376b93cb1ac32b99a046ee51ace81d1c27ed948269d75bf
+   > Blocks: 1            Seconds: 8
+   > contract address:    0x4622874690CEF1d4f70b03012156Dd60d6481927
+   > block number:        7
+   > block timestamp:     1712680646
+   > account:             0x354E68DA6285dF1Fd80D60f4a3e4f54d7A6c1bac
+   > balance:             35999999.341515
+   > gas used:            3054516 (0x2e9bb4)
+   > gas price:           200 gwei
+   > value sent:          0 ETH
+   > total cost:          0.6109032 ETH
+
+
+   Deploying 'StakerInfo'
+   ----------------------
+   > transaction hash:    0x4f14c48271425909749877a5f2065e41c8dca9639ba337c7de25940ad121dae3
+   > Blocks: 1            Seconds: 8
+   > contract address:    0xB4d25FC74f2Bba9da8c5C5dD6D56eef3680f4441
+   > block number:        8
+   > block timestamp:     1712680657
+   > account:             0x354E68DA6285dF1Fd80D60f4a3e4f54d7A6c1bac
+   > balance:             35999999.211428
+   > gas used:            650435 (0x9ecc3)
+   > gas price:           200 gwei
+   > value sent:          0 ETH
+   > total cost:          0.130087 ETH
+
+^C%
+
+…/xend-contracts  󰏗   󰍛  29GiB/36GiB | 349MiB/1GiB took 54s  dev    +                                                                                                                                                                  K8s::MK::minikube::MK::default
+❯ truffle migrate --network dev
+This version of µWS is not compatible with your Node.js build:
+
+Error: Cannot find module '../binaries/uws_darwin_arm64_120.node'
+Require stack:
+- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/node_modules/ganache/node_modules/@trufflesuite/uws-js-unofficial/src/uws.js
+- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/node_modules/ganache/dist/node/core.js
+- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/build/migrate.bundled.js
+- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/node_modules/original-require/index.js
+- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/build/cli.bundled.js
+Falling back to a NodeJS implementation; performance may be degraded.
+
+
+
+Compiling your contracts...
+===========================
+✓ Fetching solc version list from solc-bin. Attempt #1
+> Compiling ./contracts/Migrations.sol
+> Compiling ./contracts/Ownable.sol
+> Compiling ./contracts/Staker.sol
+> Compiling ./contracts/StakerInfo.sol
+> Artifacts written to /Users/posidoni/gb/Xend/xend-contracts/build/contracts
+> Compiled successfully using:
+   - solc: 0.5.17+commit.d19bba13.Emscripten.clang
+
+
+Starting migrations...
+======================
+> Network name:    'dev'
+> Network id:      42422
+> Block gas limit: 281474976710655 (0xffffffffffff)
+
+
+3_deploy_proxy.js
+=================
+
+   Deploying 'SfcAbiProxy'
+   -----------------------
+   > transaction hash:    0xa4fef92b55550ee39cc72f4c25c54237ff2de9917391c8acf3fd54f823ce41b4
+   > Blocks: 1            Seconds: 8
+   > contract address:    0xbA36B233130B981E7F06F1E4dDb4967ea2129629
+   > block number:        10
+   > block timestamp:     1712680669
+   > account:             0x354E68DA6285dF1Fd80D60f4a3e4f54d7A6c1bac
+   > balance:             35999999.1747464
+   > gas used:            154127 (0x25a0f)
+   > gas price:           200 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0308254 ETH
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           0.0308254 ETH
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.0308254 ETH
+
