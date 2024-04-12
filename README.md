@@ -92,7 +92,7 @@ If everything is all right, it should output something along this:
 
   Contract: SFC
     Returns Validator
-      ✓ Should returns Validator' status 
+      ✓ Should returns Validator' status
       ✓ Should returns Validator' Deactivated Time
       ✓ Should returns Validator' Deactivated Epoch
       ✓ Should returns Validator's Received Stake
@@ -138,7 +138,7 @@ If everything is all right, it should output something along this:
       ✓ should return the Epoch Accumulated Reward Per Token
       ✓ should return the Epoch Accumulated Uptime
       ✓ should return the Epoch Accumulated Originated Txs Fee
-      ✓ should return the Epoch Offline time 
+      ✓ should return the Epoch Offline time
       ✓ should return Epoch Offline Blocks
     Unlock features
       ✓ should fail if trying to unlock stake if not lockedup
@@ -261,11 +261,11 @@ This version of µWS is not compatible with your Node.js build:
 
 Error: Cannot find module '../binaries/uws_darwin_arm64_120.node'
 Require stack:
-- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/node_modules/ganache/node_modules/@trufflesuite/uws-js-unofficial/src/uws.js
-- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/node_modules/ganache/dist/node/core.js
-- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/build/migrate.bundled.js
-- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/node_modules/original-require/index.js
-- /Users/posidoni/.local/share/npm/lib/node_modules/truffle/build/cli.bundled.js
+- .local/share/npm/lib/node_modules/truffle/node_modules/ganache/node_modules/@trufflesuite/uws-js-unofficial/src/uws.js
+- .local/share/npm/lib/node_modules/truffle/node_modules/ganache/dist/node/core.js
+- .local/share/npm/lib/node_modules/truffle/build/migrate.bundled.js
+- .local/share/npm/lib/node_modules/truffle/node_modules/original-require/index.js
+- .local/share/npm/lib/node_modules/truffle/build/cli.bundled.js
 Falling back to a NodeJS implementation; performance may be degraded.
 
 

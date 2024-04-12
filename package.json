@@ -1,7 +1,7 @@
 {
-  "name": "opera-sfc",
+  "name": "xend-sfc",
   "version": "3.0.4-rc.5",
-  "description": "Special Fee Contract",
+  "description": "Xend Special Fee Contracts",
   "scripts": {
     "lint:js": "eslint \"test/*.js\"",
     "lint:js-fix": "eslint \"test/*.js\" --fix",
@@ -9,8 +9,7 @@
     "lint:sol": "solhint \"contracts/**/*.sol\"",
     "build": "truffle build",
     "test": "truffle test",
-    "truffle": "truffle",
-    "flatten": "rm -rf contracts/Flattened.sol && truffle-flattener contracts/sfc/SFC.sol >> contracts/Flattened.sol"
+    "truffle": "truffle"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "^2.5.1",
@@ -37,12 +36,6 @@
     "truffle-flattener": "^1.5.0",
     "web3-utils": "^1.2.1"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Fantom-foundation/opera-sfc.git"
-  },
-  "author": "Fantom Foundation",
-  "license": "MIT",
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.3",
