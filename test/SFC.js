@@ -167,9 +167,11 @@ contract("SFC", async ([account1, account2]) => {
   describe("UpdaterConsts", () => {
     it("Should update", async () => {
       const consts = await ConstantsManager.new();
+      console.log("upd", consts.address, account1);
       const upd = await UpdaterConsts.new(consts.address, account1);
-      this.sfc.transferOwnership(upd.address);
       await upd.execute2(this.sfc.address);
+
+      await this.sfc.updateConstsAddress(consts.address);
 
       expect(await this.sfc.constsAddress()).to.eq(consts.address);
       expect((await consts.minSelfStake()).toString()).to.eq(
