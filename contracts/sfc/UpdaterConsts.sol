@@ -41,8 +41,5 @@ contract UpdaterConsts {
         consts.updateTargetGasPowerPerSecond(2000000);
         consts.updateGasPriceBalancingCounterweight(3600);
         consts.transferOwnership(owner);
-
-        SFCI(sfcTo).updateConstsAddress(sfcConsts);
-        Ownable(sfcTo).transferOwnership(owner);
     }
 }
