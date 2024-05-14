@@ -7,7 +7,16 @@ import "./ConstantsManager.sol";
 
 contract NetworkInitializer {
     // Initialize NodeDriverAuth, NodeDriver and SFC in one call to allow fewer genesis transactions
-    function initializeAll(uint256 sealedEpoch, uint256 totalSupply, address payable _sfc, address _lib, address _auth, address _driver, address _evmWriter, address _owner) external {
+    function initializeAll(
+        uint256 sealedEpoch,
+        uint256 totalSupply,
+        address payable _sfc,
+        address _lib,
+        address _auth,
+        address _driver,
+        address _evmWriter,
+        address _owner
+    ) external {
         NodeDriver(_driver).initialize(_auth, _evmWriter);
         NodeDriverAuth(_auth).initialize(_sfc, _driver, _owner);
 
@@ -27,14 +36,21 @@ contract NetworkInitializer {
         consts.updateWithdrawalPeriodTime(60 * 60 * 24 * 7);
         // base reward per second = 0.93 RWA
         // (930000000000000000 / 1e18) = 0.93 RWA per second
-        consts.updateBaseRewardPerSecond(930000000000000000);
+        consts.updateBaseRewardPerSecond(0);
         consts.updateOfflinePenaltyThresholdTime(5 days);
         consts.updateOfflinePenaltyThresholdBlocksNum(1000);
         consts.updateTargetGasPowerPerSecond(2000000);
         consts.updateGasPriceBalancingCounterweight(3600);
         consts.transferOwnership(_owner);
 
-        SFCI(_sfc).initialize(sealedEpoch, totalSupply, _auth, _lib, address(consts), _owner);
+        SFCI(_sfc).initialize(
+            sealedEpoch,
+            totalSupply,
+            _auth,
+            _lib,
+            address(consts),
+            _owner
+        );
         selfdestruct(address(0));
     }
 }

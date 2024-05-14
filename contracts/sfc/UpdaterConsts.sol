@@ -33,9 +33,7 @@ contract UpdaterConsts {
         consts.updateMaxLockupDuration(86400 * 365);
         consts.updateWithdrawalPeriodEpochs(3);
         consts.updateWithdrawalPeriodTime(60 * 60 * 24 * 7);
-        // base reward per second = 0.93 RWA
-        // (930000000000000000 / 1e18) = 0.93 RWA per second
-        consts.updateBaseRewardPerSecond(930000000000000000);
+        consts.updateBaseRewardPerSecond(0);
         consts.updateOfflinePenaltyThresholdTime(5 days);
         consts.updateOfflinePenaltyThresholdBlocksNum(1000);
         consts.updateTargetGasPowerPerSecond(2000000);
