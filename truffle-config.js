@@ -28,15 +28,16 @@ dotenv.config();
 
 module.exports = {
   networks: {
-    dev: {
-      network_id: "*",
+    testnet: {
+      network_id: "42421",
       provider: () =>
         new HDWalletProvider({
           privateKeys: [process.env.SECRET],
           providerOrUrl: process.env.RPC_URL
         }),
-      gasPrice: process.env.GAS_PRICE
-      // from: "0x354e68da6285df1fd80d60f4a3e4f54d7a6c1bac"
+      gasPrice: process.env.GAS_PRICE,
+      from: "0x1CcCd1408a658A384Ba6fC7D3f5118e572125770"
+
       // gas                  - use gas and gasPrice if creating type 0 transactions
       // gasPrice             - all gas values specified in wei
       // maxFeePerGas         - use maxFeePerGas and maxPriorityFeePerGas if creating type 2 transactions (https://eips.ethereum.org/EIPS/eip-1559)
