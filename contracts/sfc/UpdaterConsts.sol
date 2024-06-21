@@ -25,7 +25,7 @@ contract UpdaterConsts {
         consts.updateMaxDelegatedRatio(16 * Decimal.unit());
         consts.updateValidatorCommission((15 * Decimal.unit()) / 100);
 
-        consts.updateBurntFeeShare((20 * Decimal.unit()) / 100);
+        consts.updateBurntFeeShare(0);
         consts.updateTreasuryFeeShare((10 * Decimal.unit()) / 100);
         consts.updateUnlockedRewardRatio((30 * Decimal.unit()) / 100);
 
